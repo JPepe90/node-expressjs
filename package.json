@@ -1,0 +1,31 @@
+{
+  "name": "expressjs",
+  "version": "1.0.0",
+  "description": "Curso de API Rest con Express en NodeJS",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "lint": "eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JPepe90/node-expressjs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JPepe90/node-expressjs/issues"
+  },
+  "homepage": "https://github.com/JPepe90/node-expressjs#readme",
+  "devDependencies": {
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.7.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.5"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
