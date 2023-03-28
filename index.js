@@ -1,6 +1,6 @@
 const express = require('express');
 const routerApi = require('./routes/index');
-
+const { logErrors, errorHandler, boomHandler } = require('./middleware/error.handler')
 const app =  express();
 const port = 3000; // se sugiere crearlo del 3000 al 3005
 
@@ -102,6 +102,12 @@ app.get('/nueva-ruta', (req, res) => {
 // Puerto a escuchar
 
 routerApi(app);
+
+// -------------------------------------------------------
+// Middlewares de tipo error. Van despues del routing
+app.use(logErrors);
+app.use(boomHandler);
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log('Escuchando en el puerto', port);

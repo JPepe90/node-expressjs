@@ -1,6 +1,12 @@
 const express = require('express');
-const faker = require('faker');
+// const faker = require('faker');
+
+// Servicios - logica de negocio
+const ProductsService = require('../services/productos.service');
+
 const router = express.Router();
+const servicioProductos = new ProductsService();
+servicioProductos.generate();
 
 const products = [{
   id: 1,
@@ -9,7 +15,7 @@ const products = [{
 },
 {
   id: 2,
-  name: 'Totadora',
+  name: 'Tostadora',
   price: 800
 },
 {
@@ -25,18 +31,9 @@ const products = [{
 
 // -----
 // Endpoint usando faker
-router.get('/', (req, res) => {
-  // cantidad prod
-  const articles = Number(req.query.articles) || 5;
-  const prod = [];
-  for (i = 0; i < articles; i++) {
-    prod.push({
-      name: faker.commerce.productName(),
-      price: parseInt(faker.commerce.price(), 10),
-      image: faker.image.imageUrl(),
-    });
-  }
-
+router.get('/', async (req, res) => {
+  // Llamo al servicio que tiene la logica de negocio
+  const prod = await servicioProductos.search();
   res.json(prod);
 });
 
@@ -50,23 +47,99 @@ router.get('/filter', (req, res) => {
 
 // -----
 // Endpoint por un solo parametro dinamico (ID)
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res, next) => {
   // determinacion del id
-  const ident = Number(req.params.id);
-  const prod = products.filter(item => item.id === ident);
+  try {
+    const ident = req.params.id;
+    const prod = await servicioProductos.findOne(ident);
+    res.status(200).json(prod);
+  } catch (error) {
+    // res.status(404).json({
+    //   message: error.message
+    // });
+    next(error); // ejecucion del middleware de error
+  }
+});
 
-  res.json(prod);
+// ***********************************************************
+// -----------------------------------------------------------
+// CREACION --------------------------------------------------
+// Metodo: POST -----
+router.post('/', async (req, res) => {
+  const body = req.body;
+  const create = await servicioProductos.create(body);
+  if (create) {
+    res.status(201).json({
+      message: 'created',
+      data: body
+    });
+  } else {
+    res.status(409).json({
+      message: 'Error en alguno de los parametros enviados o incompletos'
+    });
+  }
 });
 
 
 // -----------------------------------------------------------
-// metodo: POST -----
-router.post('/', (req, res) => {
-  const body = req.body;
-  res.json({
-    message: 'created',
-    data: body
-  });
+// ACTUALIZACION ---------------------------------------------
+// Metodo: PATCH -----
+router.patch('/:id', async (req, res) => {
+  try {
+    const body = req.body;
+    const id = req.params.id;
+
+    const respuesta = await servicioProductos.update(id, body);
+    res.status(200).json({
+      message: 'parcial update',
+      success: respuesta,
+      data: body,
+      id
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+// Metodo: PUT -----
+router.put('/:id', async (req, res, next) => {
+  try {
+    const body = req.body;
+    const id = req.params.id;
+
+    const respuesta = await servicioProductos.update(id, body);
+    res.status(200).json({
+      message: 'parcial update',
+      success: respuesta,
+      data: body,
+      id
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
+
+// -----------------------------------------------------------
+// BORRADO ---------------------------------------------------
+// Metodo: DELETE -----
+router.delete('/:id', async (req, res) => {
+  const id = req.params.id;
+  const respuesta = await servicioProductos.delete(id);
+  if (respuesta) {
+    res.json({
+      message: 'deleted',
+      id
+    });
+  } else {
+    res.status(409).json({
+      message: 'El producto indicado no fue encontrado'
+    })
+  }
+
+});
+// -----------------------------------------------------------
+// ***********************************************************
+
+
 module.exports = router;
+
