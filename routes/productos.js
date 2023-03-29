@@ -3,6 +3,8 @@ const express = require('express');
 
 // Servicios - logica de negocio
 const ProductsService = require('../services/productos.service');
+const validatorHandler = require('../middleware/validator.handler');
+const { createProductSchema, updateProductSchema, getProductSchema, } = require('../schemas/products.schema')
 
 const router = express.Router();
 const servicioProductos = new ProductsService();
@@ -47,7 +49,9 @@ router.get('/filter', (req, res) => {
 
 // -----
 // Endpoint por un solo parametro dinamico (ID)
-router.get('/:id', async (req, res, next) => {
+router.get('/:id',
+  validatorHandler(getProductSchema, 'params'),
+  async (req, res, next) => {
   // determinacion del id
   try {
     const ident = req.params.id;
