@@ -53,74 +53,86 @@ router.get('/:id',
   validatorHandler(getProductSchema, 'params'),
   async (req, res, next) => {
   // determinacion del id
-  try {
-    const ident = req.params.id;
-    const prod = await servicioProductos.findOne(ident);
-    res.status(200).json(prod);
-  } catch (error) {
-    // res.status(404).json({
-    //   message: error.message
-    // });
-    next(error); // ejecucion del middleware de error
+    try {
+      const ident = req.params.id;
+      const prod = await servicioProductos.findOne(ident);
+      res.status(200).json(prod);
+    } catch (error) {
+      // res.status(404).json({
+      //   message: error.message
+      // });
+      next(error); // ejecucion del middleware de error
+    }
   }
-});
+);
 
 // ***********************************************************
 // -----------------------------------------------------------
 // CREACION --------------------------------------------------
 // Metodo: POST -----
-router.post('/', async (req, res) => {
-  const body = req.body;
-  const create = await servicioProductos.create(body);
-  if (create) {
-    res.status(201).json({
-      message: 'created',
-      data: body
-    });
-  } else {
-    res.status(409).json({
-      message: 'Error en alguno de los parametros enviados o incompletos'
-    });
+router.post('/',
+  validatorHandler(createProductSchema, 'body'),
+  async (req, res) => {
+    const body = req.body;
+    const create = await servicioProductos.create(body);
+    if (create) {
+      res.status(201).json({
+        message: 'created',
+        data: body
+      });
+    } else {
+      res.status(409).json({
+        message: 'Error en alguno de los parametros enviados o incompletos'
+      });
+    }
   }
-});
+);
 
 
 // -----------------------------------------------------------
 // ACTUALIZACION ---------------------------------------------
 // Metodo: PATCH -----
-router.patch('/:id', async (req, res) => {
-  try {
-    const body = req.body;
-    const id = req.params.id;
+router.patch('/:id',
+  validatorHandler(getProductSchema, 'params'), // validaque el elemento exista
+  validatorHandler(updateProductSchema, 'body'), // hace las verificaciones de los parametros del body
+  async (req, res) => {
+    try {
+      const body = req.body;
+      const id = req.params.id;
 
-    const respuesta = await servicioProductos.update(id, body);
-    res.status(200).json({
-      message: 'parcial update',
-      success: respuesta,
-      data: body,
-      id
-    });
-  } catch (error) {
-    next(error);
+      const respuesta = await servicioProductos.update(id, body);
+      res.status(200).json({
+        message: 'parcial update',
+        success: respuesta,
+        data: body,
+        id
+      });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 // Metodo: PUT -----
-router.put('/:id', async (req, res, next) => {
-  try {
-    const body = req.body;
-    const id = req.params.id;
+router.put('/:id',
+  validatorHandler(getProductSchema, 'params'), // validaque el elemento exista
+  validatorHandler(updateProductSchema, 'body'), // hace las verificaciones de los parametros del body
+  async (req, res, next) => {
+    try {
+      const body = req.body;
+      const id = req.params.id;
 
-    const respuesta = await servicioProductos.update(id, body);
-    res.status(200).json({
-      message: 'parcial update',
-      success: respuesta,
-      data: body,
-      id
-    });
-  } catch (error) {
-    next(error);
+      const respuesta = await servicioProductos.update(id, body);
+      res.status(200).json({
+        message: 'parcial update',
+        success: respuesta,
+        data: body,
+        id
+      });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 
 // -----------------------------------------------------------

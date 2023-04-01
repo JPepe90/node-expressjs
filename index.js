@@ -1,10 +1,30 @@
 const express = require('express');
+const cors = require('cors');
 const routerApi = require('./routes/index');
 const { logErrors, errorHandler, boomHandler } = require('./middleware/error.handler')
 const app =  express();
 const port = 3000; // se sugiere crearlo del 3000 al 3005
 
 app.use(express.json()); // middleware para recibir informacion en json enviada por post
+
+// ----------------------------------------------
+// Dominios a los que quiero darle acceso de CORS
+const whiteList = [];
+whiteList.push('http://localhost:8080');
+whiteList.push('http://myapp.com');
+
+const options = {
+  origin: (origin, callback) => {
+    if (whiteList.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Acceso no permitido!'));
+    }
+  }
+}
+
+app.use(cors(options)); // para usar cross origin resource sharing
+// ----------------------------------------------
 
 const products = [{
   id: 1,

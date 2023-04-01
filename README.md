@@ -51,6 +51,17 @@ req --> middleware --> middleware --> middleware --> response
 
 Un ejemplo sería un middleware de autenticacion en secuencia con un middleware de validacion de información y un middleware de procesamiento de formulario.
 
+Middlewares populares:
+
+- CORS: Middleware para habilitar CORS (Cross-origin resource sharing) en nuestras rutas o aplicación. http://expressjs.com/en/resources/middleware/cors.html
+- Morgan: Un logger de solicitudes HTTP para Node.js. http://expressjs.com/en/resources/middleware/morgan.html
+- Helmet: Helmet nos ayuda a proteger nuestras aplicaciones Express configurando varios encabezados HTTP. ¡No es a prueba de balas de plata, pero puede ayudar! https://github.com/helmetjs/helmet
+- Express Debug: Nos permite hacer debugging de nuestras aplicaciones en Express mediante el uso de un toolbar en la pagina cuando las estamos desarrollando. https://github.com/devoidfury/express-debug
+- Express Slash: Este middleware nos permite evitar preocuparnos por escribir las rutas con o sin slash al final de ellas. https://github.com/ericf/express-slash
+- Passport: Passport es un middleware que nos permite establecer diferentes estrategias de autenticación a nuestras aplicaciones. https://github.com/jaredhanson/passport
+
+Mas middlewares populares en el siguiente enlace: http://expressjs.com/en/resources/middleware.html
+
 Vemos un ejemplo de middleware generico para errores.
 
 ## Manejo de errores con Boom
@@ -62,3 +73,41 @@ Boom incluye varios metodos para el manejo de los errores http como:
 Esto simplifica el manejo de los errores usando el status()
 
 ## Validaciones de datos con JOI
+Se crean los schemas de cada validacion en la carpeta schemas y luego se llama al handler validador en el middleware armado en la funcion validator.handler.js
+
+En el caso del update, llamamos primero al middleware validador de que exista el elementos y despues verifica con otro middleware que los parametros esten validados.
+
+# Consideraciones para Produccion
+
+- CORS (https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+- HTTP
+- Procesos de Build
+- Remover Logs
+- Seguridad (Helmet)
+- Testing
+
+## Solucion de CORS
+
+Instalacion de la librerioa cors
+
+npm i cors
+
+una vez instalada, la debo importar. para agregara la lista de dominios genero un array con la lista blanca de dominios que deseo que puedan acceder. 
+
+const whiteList = ['http://localhost:8080', 'http://mydomain.com']
+
+y luego debo generar un objeto que contenga un parametro llamado origin que contenga una funcion que determine si el dominio especificado es parte de la whiteList y devuelva true en el callback. Caso contrario debe informar con un error u otra accion.
+
+const options = {
+  origin: (origin, callback) => {
+    if (whiteList.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Acceso no permitido!'));
+    }
+  }
+}
+
+y por ultimo se debe incluir la constante importada con su option definida:
+
+app.use(cors(options));
