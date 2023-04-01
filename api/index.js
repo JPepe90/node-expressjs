@@ -2,9 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const routerApi = require('./routes/index');
 const { logErrors, errorHandler, boomHandler } = require('./middleware/error.handler')
-const app =  express();
-const port = 3000; // se sugiere crearlo del 3000 al 3005
 
+const app =  express();
+const port = process.env.PORT || 3000; // se sugiere crearlo del 3000 al 3005
 app.use(express.json()); // middleware para recibir informacion en json enviada por post
 
 // ----------------------------------------------
@@ -26,35 +26,14 @@ const options = {
 app.use(cors(options)); // para usar cross origin resource sharing
 // ----------------------------------------------
 
-const products = [{
-  id: 1,
-  name: 'Bicicleta',
-  price: 1000
-},
-{
-  id: 2,
-  name: 'Totadora',
-  price: 800
-},
-{
-  id: 3,
-  name: 'Mouse',
-  price: 350
-},
-{
-  id: 4,
-  name: 'Auriculares BT',
-  price: 600
-}];
-
 // -----
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('Hola, mi server en Express');
 });
 
 // -------------------------------------------------------
 // Diferentes Endpoints o Rutas
-app.get('/nueva-ruta', (req, res) => {
+app.get('/api/nueva-ruta', (req, res) => {
   res.send('Hola, soy una nueva ruta');
 });
 
