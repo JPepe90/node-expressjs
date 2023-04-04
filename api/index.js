@@ -7,23 +7,25 @@ const app =  express();
 const port = process.env.PORT || 3000; // se sugiere crearlo del 3000 al 3005
 app.use(express.json()); // middleware para recibir informacion en json enviada por post
 
+
 // ----------------------------------------------
 // Dominios a los que quiero darle acceso de CORS
-const whiteList = [];
+const whiteList = ['http://localhost:3000'];
 whiteList.push('http://localhost:8080');
 whiteList.push('http://myapp.com');
 
-const options = {
+const corsOptions = {
   origin: (origin, callback) => {
     if (whiteList.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Acceso no permitido!'));
+      callback(new Error('Acceso no permitido desde', origin));
     }
   }
-}
+};
 
-app.use(cors(options)); // para usar cross origin resource sharing
+// NO FUNCIONA!
+// app.use(cors(corsOptions)); // para usar cross origin resource sharing
 // ----------------------------------------------
 
 // -----

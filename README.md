@@ -1,7 +1,7 @@
 # node-expressjs
 Curso de API Rest con Express en NodeJS
 
-## Plugins y configuraciones
+### Plugins y configuraciones
 ESLinter, Nodemon, Express y EditorConfig.
 
 ## Routing con Express
@@ -21,17 +21,17 @@ www.index.com/products?queryparams=parametro&queryparam2=param2
 ## REQ Params
 ver ejemplos definidos en index.js
 
-## Single Responsibility Principle
+### Single Responsibility Principle
 Se genera un archivo por cada ruta de cada endpoint, y se debe definir una regla con el equipo de trabajo. Por ejemplo generar una carpeta route y alli crear un archivo con cada una de las rutas principales. Por ejemplo:
 
 productos.js
 categorias.js
 users.js
 
-## POST y JSON notation
+### POST y JSON notation
 app.json('url', (req, res) => {}) y app.use(express.json()).
 
-## Status Code HTTP
+### Status Code HTTP
 - Respuestas Informativas (100 a 199)
 - Respuestas exitosas (200 a 299)
 - Redireccionamiento (300 a 399)
@@ -111,3 +111,24 @@ const options = {
 y por ultimo se debe incluir la constante importada con su option definida:
 
 app.use(cors(options));
+
+# Desplegar app en ambiente productivo Heroku / Vercel
+
+- Heroku: No se realizo por no tener cuenta
+- Vercel: 
+
+-------------------------------------------------------------------------
+###### 3/4/2023
+Creacion de endpoints y servicios para usuarios. Tambien se generaron servicios vacios para categorias ya que no se tiene clara la estructura de estas.
+
+
+-------------------------------------------------------------------------
+###### 4/4/2023
+Schemas de la seccion usuarios terminados. Se agregó la imagen a los parametros del metodo generate() de la clase UsersService. 
+Dentro de los schema se crearon 3 metodos con Joi: uno de creacion, uno de actualizacion y un get, similar a los de productos.
+
+Tambien se agregaron las validaciones con los schemas a cada endpoint en el routing con su correspondiente try catch.
+
+Issue: Sigue pendiente el problema de CORS ya que no funcionan las corsOption con la validacion de dominios.
+
+-------------------------------------------------------------------------

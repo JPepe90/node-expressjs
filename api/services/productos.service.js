@@ -1,4 +1,4 @@
-const faker = require('faker');
+const faker = require('@faker-js/faker').faker;
 const boom = require('@hapi/boom');
 
 class ProductsService {
@@ -7,7 +7,7 @@ class ProductsService {
   }
 
   // metodos
-  async generate() {
+  generate() {
     for (let i = 0; i < 100; i++) {
       this.products.push({
         id: faker.datatype.uuid(),

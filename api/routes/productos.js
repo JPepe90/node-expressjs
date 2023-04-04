@@ -1,7 +1,8 @@
 const express = require('express');
-// const faker = require('faker');
 
-// Servicios - logica de negocio
+// ###################################################################
+// SERVICIOS - logica de negocio
+// ###################################################################
 const ProductsService = require('../services/productos.service');
 const validatorHandler = require('../middleware/validator.handler');
 const { createProductSchema, updateProductSchema, getProductSchema, } = require('../schemas/products.schema')
@@ -31,8 +32,9 @@ const products = [{
   price: 600
 }];
 
-// -----
-// Endpoint usando faker
+// ###################################################################
+// ENDPOINTS
+// ###################################################################
 router.get('/', async (req, res) => {
   // Llamo al servicio que tiene la logica de negocio
   const prod = await servicioProductos.search();
@@ -95,7 +97,7 @@ router.post('/',
 router.patch('/:id',
   validatorHandler(getProductSchema, 'params'), // validaque el elemento exista
   validatorHandler(updateProductSchema, 'body'), // hace las verificaciones de los parametros del body
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const body = req.body;
       const id = req.params.id;
