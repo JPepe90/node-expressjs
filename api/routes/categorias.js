@@ -1,46 +1,99 @@
 const express = require('express');
-const router = express.Router()
 
 const CategoriesService = require('../services/categorias.service');
+const validatorHandler = require('../middleware/validator.handler');
+const { createCategorySchema, updateCategorySchema, getCategorySchema } = require('../schemas/category.schema');
+const { valid } = require('joi');
+
+const router = express.Router()
 const categoryService = new CategoriesService();
 
-const products = [{
-  id: 1,
-  name: 'Bicicleta',
-  price: 1000
-},
-{
-  id: 2,
-  name: 'Totadora',
-  price: 800
-},
-{
-  id: 3,
-  name: 'Mouse',
-  price: 350
-},
-{
-  id: 4,
-  name: 'Auriculares BT',
-  price: 600
-}];
-
-// -----
+// ###################################################################
+// ENDPOINTS
+// ###################################################################
 // Endpoint con varios parametros dinamicos
-router.get('/:categoryId/productos/:productId', (req, res) => {
-  // determinacion del id por categoria
-  const { categoryId, productId } = req.params;
-  const respuesta = categoryService.findOne(categoryId, productId);
-
-  res.json({ productId,categoryId,...respuesta });
+router.get('/:categoryId',
+  validatorHandler(getCategorySchema, 'params'),
+  async (req, res) => {
+  const id = req.params.id;
+  try {
+    const categories = await categoryService.findOne(id);
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(409).json({
+      message: 'Error en el procesamiento de la solicitud'
+    });
+  }
 });
 
-router.get('/:categoryId/productos', (req, res) => {
-  // determinacion del id por categoria
-  const categoryId = req.params.categoryId;
-  const respuesta = categoryService.search(categoryId);
-
-  res.json({ categoryId,...respuesta });
+router.get('/',
+  async (req, res) => {
+  try {
+    const categories = await categoryService.search();
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(409).json({
+      message: 'Error en el procesamiento de la solicitud'
+    });
+  }
 });
+
+// Metodo: POST -----
+router.post('/',
+  validatorHandler(createCategorySchema, 'body'),
+  async (req,res) => {
+    const data = req.body;
+    try {
+      const newCategory = await categoryService.create(data);
+      res.status(201).json(newCategory);
+    } catch (error) {
+      res.status(409).json({
+        message: "No se pudo crear la categoria",
+        data: error
+      });
+    }
+});
+
+// Metodo: PUT -----
+router.put('/:id',
+  validatorHandler(getCategorySchema, 'params'),
+  validatorHandler(updateCategorySchema, 'body'),
+  async (req, res) => {
+    const id = req.params.id;
+    const data = req.body;
+    try {
+      const updateCat = await categoryService.update(id, data);
+      res.status(200).json({
+        message: 'Categoria actualizada',
+        data: updateCategorySchema
+      });
+    } catch (error) {
+      res.status(409).json({
+        message: 'Error al actualizar la categoria',
+        error: error
+      });
+    }
+  }
+);
+
+// Metodo: DELETE -----
+router.delete('/:id',
+  validatorHandler(getCategorySchema, 'params'),
+  async (req, res) => {
+    const id = req.params.id;
+    try {
+      const deleteCat = await categoryService.delete(id);
+      res.status(200).json({
+        message: 'Categoria borrada',
+        data: deleteCat
+      });
+    } catch (error) {
+      res.status(409).json({
+        message: 'Falla en el borrado de la categoria',
+        error: error
+      });
+    }
+  }
+);
 
 module.exports = router;

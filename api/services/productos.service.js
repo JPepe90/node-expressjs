@@ -1,9 +1,13 @@
 const faker = require('@faker-js/faker').faker;
 const boom = require('@hapi/boom');
 
+// const sequelize = require('../../libs/sequelize');
+const { models } = require('../../libs/sequelize');
+
 class ProductsService {
   constructor() {
     this.products = [];
+    this.generate();
   }
 
   // metodos
@@ -36,12 +40,14 @@ class ProductsService {
     }
   }
 
-  search() {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(this.products);
-      }, 1500);
-    })
+  async search() {
+    // Metodo query con sequelize
+    // const query = 'select * from products';
+    // const [data, metadata] = await sequelize.query(query);
+    // return data;
+
+    const result = models.Product.findAll();
+    return result;
   }
 
   async findOne(id) {

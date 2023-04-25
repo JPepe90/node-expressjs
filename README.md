@@ -115,7 +115,13 @@ app.use(cors(options));
 # Desplegar app en ambiente productivo Heroku / Vercel
 
 - Heroku: No se realizo por no tener cuenta
-- Vercel: 
+- Vercel: Desplegada la app de forma completa hasta la fecha con integracion continua a la rama master del repo de Github. Las referencias de la API segun sus deploy:
+
+https://node-expressjs-hxm5ef0yu-jpepe90.vercel.app/api/v1/
+
+El dashboard de esta API en Vercel esta en la ruta:
+
+https://vercel.com/jpepe90/node-expressjs
 
 -------------------------------------------------------------------------
 ###### 3/4/2023
@@ -132,3 +138,98 @@ Tambien se agregaron las validaciones con los schemas a cada endpoint en el rout
 Issue: Sigue pendiente el problema de CORS ya que no funcionan las corsOption con la validacion de dominios.
 
 -------------------------------------------------------------------------
+###### 17/4/2023
+
+Instalacion de Docker para crear un contenedor de PostgreSQL. En el archivo docker-compose.yaml se definio el servicio postgres y los datos necesarios para el inicio, como tambien el puerto y el volumen donde persistir la informacion. Para iniciar el contenedor, desde la consola se ejecutó el comando:
+
+- docker-compose up -d postgres
+
+Para verificar que el servicio esté corriendo:
+
+- docker-compose ps
+
+Para remover el contenedor:
+
+- docker-compose down <service name>
+
+Se agrego el contenedor PgAdmin como insterfaz grafica de PostgreSQL, que funciona en un entorno web, al archivo docker-compose.
+
+Para saber la ip en la que está corriendo un contenedor, debo obtener su ID con el comando:
+
+- docker ps
+
+Con ese ID lo inspecciono, con el comando:
+
+- docker inpect <ID>
+
+Y puedo extraer la ipv4 utilizada del campo "IPAddress".
+
+### Conexion con node-postgres
+En la carpeta libs se armó la conexión al client. En el archivo postgres.pool.js está el metodo mas optimo para el manejo de un pool de conexiones. Es el que se utilizará para hacer uso de la base de datos.
+
+### Configuracion de variables de Entorno
+Creamos la carpeta config con el archivo config.js. Alli se crea un objeto con las variables de entorno necesarias y se vincula con el archivo postgres.pool para generar la URI de conexion (tambien se codifican los datos para dar mas seguridad). Luego creamos el archivo ".env" en la raiz donde cargamos los parametros necesarios e instalamos el paquete dotenv para poder vincularlos con nuestro proceso de node.
+
+lo importamos al archivo config.js con la siguiente linea para que lea el archivo .env y agregue cada parametro a las instrucciones de run:
+
+- require('dotenv').config();
+
+### ORM
+Object Relational Model: Mapea toda nuestra base de datos con metodos de programacion orientada a objetos.
+Agrega una capa de abstraccion mas a nuestra interaccion con la base de datos para que podamos usar los metodos de objetos (como find, map, filter) en vez de los clasicos de sql (select, insert, alter). Esto la hace AGNOSTICA, lo que quiere decir que nos permite rapida y facilmente cambiar de una base de datos SQL a otra sin tener que alterar todo el codigo. Los dos mas comunes son Sequelize ORM y TypeORM.
+
+- npm install --save sequelize
+- npm install --save pg pg-hstore
+
+Se crea el archivo sequelize.js en libs de forma similar al de pool. Su uso en los servicios es tambien similar a pool.
+
+#### Creacion de modelos o entidades ORM
+En la carpeta models se crean todos los esquemas del modelo de tablas con el que se van a trabajar en las bases de datos y sus correspondientes tipos de datos y propiedades. Una vez definido el esquema y la tabla, se crea la clase y se le agregan los medotos extendidos del Objeto Model importado al principio del archivo. Esto nos permito utilizar todas las herramientas del modelado de sequelize. se crea un metodo estatico llamado associate que por el momento dejamos vacio (mas adelante se trabajará) y luego creamos otro metodo estático llamado config, donde enviamos todos los parámetros requeridos por el iniciados del setupModels que esta definido el archivo index.js de la misma carpeta. la funcion setupModels es la encargada de recopilar todos los esquemas que hayamos definido en models, importarlos al principio e inicializarlos uno a uno. De esta forma, todos los metodos de Objetos quedan inicializados para poder interactuar con la base de datos que hayamos modelados previamente.
+
+Luego se incluye el setupModels en las importaciones del archivo sequelize.js y se corre dicha funcion luego de inicializar la conexion con el servidor, para que estas sean modelizadas.
+
+Una vez realizado esto, en cada servicio importamos el { model } resultante del archivo sequelize.js y lo podemos utilizar por medio de las intrucciones heredadas:
+
+- model.<ModelName>.<metodo()>
+
+-------------------------------------------------------------------------
+###### 20/04/23
+### Migraciones con Sequelize cli
+Instalamos el paquete sequelize-cli --save-dev. Generamos el archivo .sequelizerc en la raiz del directorio y creamos las carpetas migratios y seeders en el directorio ./db. Tambien agregamos al directorio el archivo config correspondiente.
+
+Luego agregamos una nueva instruccion de scrips den el package de npm:
+
+- "migrations:generate": "sequelize-cli migrations:generate --name"
+
+una vez agregado este comando de script en el package.json se elimina el sequelize.sync() del archivo sequelize.json para que ahora las modificaciones se hagan por los scripts de migracion. Al correr el comando en la terminal:
+
+- npm run migrations:generate create-user
+
+Se genera en la carpeta migrations un nuevo archivo demigracion con las instrucciones up para migrar y down para el rollback per vacios (void plate). Alli importamos los esquemas y tablas definidos en la carpeta models (use los de products y user) y los incluí en los metodos up y down para que se inicialicen y se borren segun corresponda.
+
+Tambien se agregaron otros scrips al pakage.json:
+
+- "migrations:run": "sequelize-cli db:migrate" // migra
+- "migrations:revert": "sequelize-cli db:migrate:undo" // rollback
+- "migrations:delete": "sequelize-cli db:migrate:undo:all" // borra todo
+
+Luego borramos las tablas con PgAdmin para dejar la base de datos limpia y corrimos desde la consola el script:
+
+- npm run migrations:run
+
+Esto nos creo las tablas 'products', 'users' y tambien una llamada SequelizeMeta que contiene el historico de migraciones.
+
+Vemos un ejemplo de segunda migracion donde alteramos una tabla ya creada agregandole un nuevo campo llamado role a la tabla usuarios mediante una migracion, sin alterar el contenido anterior de las tablas.
+
+-------------------------------------------------------------------------
+###### 21/04/23
+Se creó toda la seccion de customers (routes, schemas, models, db, etc). La tabla se creó desde la base de datos, no por medio de una migracion.
+
+-------------------------------------------------------------------------
+###### 24/04/23
+### Asociaciones 1 a 1
+Para asociar los Customers a los Usuarios, vamos a usar el metodo belongsTo() en el archivo customers.model.js, en el metodo associate().
+Luego de crear las asociaciones y crear las tablas con una migracion, agregamos el metodo unique al uid y generamos una nueva migracion para agregar este campo (ver migracion correspondiente).
+
+#### Validacion de campos para la FKey
+Para validar el campo de foreign key antes de hacer la creacion de un nuevo customer

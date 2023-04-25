@@ -1,52 +1,43 @@
 const boom = require('@hapi/boom');
-// array base para trabajar las categorias
-const productosBase  = [
-  { id: 1, category: 'Telephone'},
-  { id: 2, category: 'Desktop'},
-]
+const { models } = require('../../libs/sequelize');
 
 class CategoriesService {
-  // constructor() {}
-
-  // create() {}
-
-
-  search(categoryId) {
+  constructor() {
     //
-    // const prods = servicioProductos.filter(item => item.category === categoryId);
-    const prods = [];
-    return prods;
   }
 
-  findOne(categoryId, productId) {
-    //
-    // const prod = servicioProductos.filter(item => item.category === categoryId && item.id === Number(productId));
-    const prod = [];
-    return prod;
+  async create(data) {
+    const result = await models.Category.create(data);
+    if (!result) {
+      throw boom.conflict('No se pudo crear la categoria');
+    }
+    return result;
   }
 
-  update(id, category) {
-    const prodIndex = productosBase.findIndex(item => item.id === id);
-    if (prodIndex === -1) {
-      throw boom.notFound('Articulo no encontrado!');
-    }
 
-    const prod = productosBase[id];
-    productosBase[id] = {
-      ...prod,
-      ...category,
-    }
+  search() {
+    const result = models.Categories.findAll();
+    return result;
   }
 
-  delete(category) {
-    // Valido si la categoria no contiene a ningun producto. Si tiene alguno rechazo el borrado
-    const resto = productosBase.findIndex(item => item.category === category);
-
-    if (resto >= 0) {
-      throw boom.conflict('No se puede Borrar la Categoria porque aun quedan elementos asociados a ella');
+  findOne(catId) {
+    const result = models.Categories.findByPk(catId);
+    if (!result) {
+      throw boom.notFound('Categoria no encontrada');
     }
+    return result;
+  }
 
-    // Borrado de categoria
+  async update(id, data) {
+    const catId = await this.models.Categories.findOne(id);
+    const result = await models.Categories.update(data);
+    return result;
+  }
+
+  async delete(id) {
+    const catId = await this.findOne(id);
+    const result = await this.Categories.destroy(id);
+    return result;
   }
 }
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const routerApi = require('./routes/index');
-const { logErrors, errorHandler, boomHandler } = require('./middleware/error.handler')
+const { logErrors, errorHandler, boomHandler, ormErrorHandler } = require('./middleware/error.handler')
 
 const app =  express();
 const port = process.env.PORT || 3000; // se sugiere crearlo del 3000 al 3005
@@ -107,6 +107,7 @@ routerApi(app);
 // -------------------------------------------------------
 // Middlewares de tipo error. Van despues del routing
 app.use(logErrors);
+app.use(ormErrorHandler);
 app.use(boomHandler);
 app.use(errorHandler);
 

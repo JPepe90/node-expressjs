@@ -9,7 +9,6 @@ const { createProductSchema, updateProductSchema, getProductSchema, } = require(
 
 const router = express.Router();
 const servicioProductos = new ProductsService();
-servicioProductos.generate();
 
 const products = [{
   id: 1,

@@ -1,6 +1,6 @@
 const joi = require('joi');
 
-const id = joi.string().uuid();
+const id = joi.number();
 const name = joi.string().min(3).max(30);
 const price = joi.number().integer().min(1);
 const image = joi.string().uri();
