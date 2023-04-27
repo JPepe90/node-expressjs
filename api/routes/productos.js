@@ -5,7 +5,7 @@ const express = require('express');
 // ###################################################################
 const ProductsService = require('../services/productos.service');
 const validatorHandler = require('../middleware/validator.handler');
-const { createProductSchema, updateProductSchema, getProductSchema, } = require('../schemas/products.schema')
+const { createProductSchema, updateProductSchema, getProductSchema, queryProductSchema } = require('../schemas/products.schema');
 
 const router = express.Router();
 const servicioProductos = new ProductsService();
@@ -34,14 +34,16 @@ const products = [{
 // ###################################################################
 // ENDPOINTS
 // ###################################################################
-router.get('/', async (req, res, next) => {
-  // Llamo al servicio que tiene la logica de negocio
-  try {
-    const prod = await servicioProductos.search();
-    res.status(200).json(prod);
-  } catch (error) {
-    next(error);
-  }
+router.get('/',
+  validatorHandler(queryProductSchema, 'query'),
+  async (req, res, next) => {
+    // Llamo al servicio que tiene la logica de negocio
+    try {
+      const prod = await servicioProductos.search(req.query);
+      res.status(200).json(prod);
+    } catch (error) {
+      next(error);
+    }
 });
 
 // -----

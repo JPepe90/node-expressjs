@@ -236,3 +236,20 @@ Se utilizan los metodos hasMany() o belongstoMany(). Ver casos de customers.mode
 
 ### Asociaciones muchos a muchos
 Es el caso de las ordenes de compra y los productos ya que pueden estar entrelazados y muchas ordenes tener el mismo productos, como asi la misma orden tener muchos productos. Para resolver estas relaciones se crea una tabla ternaria en el archivo order.product.model.js donde se especifica el modelo de la base de datos que luego relacionará la informacion de las ordenes y los productos. En este caso, desde orders.model.js agregamos la asociacion belongstoMany(), indicando que el destino es la tabla products pero atravez de la tabla ternaria order_products utilizando los campos oid y pid, y llamando a este nuevo array con el nombre 'items'.
+
+#### Calculando en forma anidada desde Sequelize
+podemos crear nuevos campos en el modelo que no se crearan en las tablas con el DataTypes.VIRTUAL. con el get() especificamos como obtener la información a calcular.
+
+Ver ejemplo hecho en orders.model.js.
+
+### Tipos de consulta customizadas con Sequelize
+#### Paginacion
+- limit = Numero de elementos que me trae
+- offset = Apuntador de pagina
+
+Ver ejemplo en productos.service.js. En general estos parametros vienen en los query params. Antes creamos un schema de validacion llamado queryProductSchema y lo usamos para validar su tipo.
+
+#### Filtrando de forma compleja
+Probaremos enviar un precio minimo y maximo y filtrarlo por medio de sequelize y query params. Estos se hacen por medio de la libreria sequelize y los metodos de Op.
+
+Ver ejemplo en el metodo search del archivo productos.service.js.

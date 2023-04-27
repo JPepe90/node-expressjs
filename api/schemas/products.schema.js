@@ -8,6 +8,12 @@ const categoryId = joi.number().integer();
 const description = joi.string().min(3);
 const isBlock = joi.boolean();
 
+// Parametros de query
+const limit = joi.number().integer();
+const offset = joi.number().integer();
+const minPrice = joi.number().integer();
+const maxPrice = joi.number().integer();
+
 const createProductSchema = joi.object({
   name: name.required(),
   price: price.required(),
@@ -29,4 +35,16 @@ const getProductSchema = joi.object({
   id: id.required(),
 });
 
-module.exports = { createProductSchema, updateProductSchema, getProductSchema };
+const queryProductSchema = joi.object({
+  limit: limit,
+  offset: offset,
+  price: price,
+  minPrice: minPrice,
+  maxPrice: maxPrice,
+  // maxPrice: maxPrice.when('minPrice', {
+  //   is: joi.number().integer(),
+  //   then: joi.required()
+  // })
+});
+
+module.exports = { createProductSchema, updateProductSchema, getProductSchema, queryProductSchema };
