@@ -12,7 +12,7 @@ const categoryService = new CategoriesService();
 // ENDPOINTS
 // ###################################################################
 // Endpoint con varios parametros dinamicos
-router.get('/:categoryId',
+router.get('/:id',
   validatorHandler(getCategorySchema, 'params'),
   async (req, res) => {
   const id = req.params.id;
@@ -41,16 +41,13 @@ router.get('/',
 // Metodo: POST -----
 router.post('/',
   validatorHandler(createCategorySchema, 'body'),
-  async (req,res) => {
+  async (req, res, next) => {
     const data = req.body;
     try {
       const newCategory = await categoryService.create(data);
       res.status(201).json(newCategory);
     } catch (error) {
-      res.status(409).json({
-        message: "No se pudo crear la categoria",
-        data: error
-      });
+      next(error);
     }
 });
 
@@ -58,7 +55,7 @@ router.post('/',
 router.put('/:id',
   validatorHandler(getCategorySchema, 'params'),
   validatorHandler(updateCategorySchema, 'body'),
-  async (req, res) => {
+  async (req, res, next) => {
     const id = req.params.id;
     const data = req.body;
     try {
@@ -68,10 +65,11 @@ router.put('/:id',
         data: updateCategorySchema
       });
     } catch (error) {
-      res.status(409).json({
-        message: 'Error al actualizar la categoria',
-        error: error
-      });
+      // res.status(409).json({
+      //   message: 'Error al actualizar la categoria',
+      //   error: error
+      // });
+      next(error);
     }
   }
 );

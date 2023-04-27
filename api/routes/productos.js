@@ -34,10 +34,14 @@ const products = [{
 // ###################################################################
 // ENDPOINTS
 // ###################################################################
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   // Llamo al servicio que tiene la logica de negocio
-  const prod = await servicioProductos.search();
-  res.json(prod);
+  try {
+    const prod = await servicioProductos.search();
+    res.status(200).json(prod);
+  } catch (error) {
+    next(error);
+  }
 });
 
 // -----
@@ -55,13 +59,10 @@ router.get('/:id',
   async (req, res, next) => {
   // determinacion del id
     try {
-      const ident = req.params.id;
-      const prod = await servicioProductos.findOne(ident);
+      const id = req.params.id;
+      const prod = await servicioProductos.findOne(id);
       res.status(200).json(prod);
     } catch (error) {
-      // res.status(404).json({
-      //   message: error.message
-      // });
       next(error); // ejecucion del middleware de error
     }
   }
@@ -73,22 +74,16 @@ router.get('/:id',
 // Metodo: POST -----
 router.post('/',
   validatorHandler(createProductSchema, 'body'),
-  async (req, res) => {
+  async (req, res, next) => {
     const body = req.body;
-    const create = await servicioProductos.create(body);
-    if (create) {
-      res.status(201).json({
-        message: 'created',
-        data: body
-      });
-    } else {
-      res.status(409).json({
-        message: 'Error en alguno de los parametros enviados o incompletos'
-      });
+    try {
+      const newProduct = await servicioProductos.create(body);
+      res.status(201).json(newProduct);
+    } catch (error) {
+      next(error);
     }
   }
 );
-
 
 // -----------------------------------------------------------
 // ACTUALIZACION ---------------------------------------------
@@ -97,10 +92,9 @@ router.patch('/:id',
   validatorHandler(getProductSchema, 'params'), // validaque el elemento exista
   validatorHandler(updateProductSchema, 'body'), // hace las verificaciones de los parametros del body
   async (req, res, next) => {
+    const body = req.body;
+    const id = req.params.id;
     try {
-      const body = req.body;
-      const id = req.params.id;
-
       const respuesta = await servicioProductos.update(id, body);
       res.status(200).json({
         message: 'parcial update',
@@ -118,10 +112,9 @@ router.put('/:id',
   validatorHandler(getProductSchema, 'params'), // validaque el elemento exista
   validatorHandler(updateProductSchema, 'body'), // hace las verificaciones de los parametros del body
   async (req, res, next) => {
+    const body = req.body;
+    const id = req.params.id;
     try {
-      const body = req.body;
-      const id = req.params.id;
-
       const respuesta = await servicioProductos.update(id, body);
       res.status(200).json({
         message: 'parcial update',
@@ -135,28 +128,25 @@ router.put('/:id',
   }
 );
 
-
 // -----------------------------------------------------------
 // BORRADO ---------------------------------------------------
 // Metodo: DELETE -----
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',
+  validatorHandler(getProductSchema, 'params'),
+  async (req, res, next) => {
   const id = req.params.id;
-  const respuesta = await servicioProductos.delete(id);
-  if (respuesta) {
-    res.json({
+  try {
+    const respuesta = await servicioProductos.delete(id);
+    res.status(200).json({
       message: 'deleted',
       id
     });
-  } else {
-    res.status(409).json({
-      message: 'El producto indicado no fue encontrado'
-    })
+  } catch (error) {
+    next(error);
   }
-
 });
 // -----------------------------------------------------------
 // ***********************************************************
-
 
 module.exports = router;
 
