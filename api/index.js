@@ -1,12 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const routerApi = require('./routes/index');
+const { checkApiKey } = require('./middleware/auth.handler');
 const { logErrors, errorHandler, boomHandler, ormErrorHandler } = require('./middleware/error.handler')
 
 const app =  express();
 const port = process.env.PORT || 3000; // se sugiere crearlo del 3000 al 3005
 app.use(express.json()); // middleware para recibir informacion en json enviada por post
-
 
 // ----------------------------------------------
 // Dominios a los que quiero darle acceso de CORS
@@ -28,14 +28,18 @@ const corsOptions = {
 // app.use(cors(corsOptions)); // para usar cross origin resource sharing
 // ----------------------------------------------
 
+require('../utils/auth'); // passport JS para autenticacion
+
 // -----
-app.get('/api', (req, res) => {
+app.get('/api/v1', (req, res) => {
   res.send('Hola, mi server en Express');
 });
 
 // -------------------------------------------------------
 // Diferentes Endpoints o Rutas
-app.get('/api/nueva-ruta', (req, res) => {
+app.get('/api/v1/nueva-ruta',
+  checkApiKey,
+  (req, res, next) => {
   res.send('Hola, soy una nueva ruta');
 });
 
@@ -103,6 +107,8 @@ app.get('/api/nueva-ruta', (req, res) => {
 // Puerto a escuchar
 
 routerApi(app);
+
+
 
 // -------------------------------------------------------
 // Middlewares de tipo error. Van despues del routing

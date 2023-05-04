@@ -1,5 +1,5 @@
 const boom = require('@hapi/boom');
-// const faker = require('@faker-js/faker').faker; // import para el metodo generate de practicas
+const bcrypt = require('bcrypt');
 
 // Conexion con postgres
 // const pool = require('../../libs/postgres.pool') // La reemplazamos por sequelize
@@ -8,9 +8,6 @@ const { models } = require('../../libs/sequelize');
 class UsersService {
   constructor() {
     this.usersBase = [];
-    // this.generate();
-    // this.pool = pool;
-    // this.pool.on('error', (err) => console.error(err));
   }
 
   generate() {
@@ -27,12 +24,15 @@ class UsersService {
   }
 
   async create(data) {
+    const hashPw = await bcrypt.hash(data.password, 10); // Encriptando la pw
     const newUser = {
       ...data,
-      createdAt: Date.now()
+      password: hashPw,
+      // createdAt: Date.now()
     };
     const result = await models.User.create(newUser);
-    return result;
+    delete newUser.password; // elimino el pw de la respuesta de la api
+    return newUser;
   }
 
   async getAll() {
@@ -47,6 +47,7 @@ class UsersService {
     // Metodo con ORM con sequelize
     const result = models.User.findAll({
       include: ['customer'],
+      attributes: {exclude: ['password', 'recoveryToken']},
     });
     return result;
   }
@@ -78,15 +79,25 @@ class UsersService {
       default:
         throw boom.conflict('La busqueda especifica debe hacerse por ID o email');
     }
+    delete usr.dataValues.recoveryToken;
+    delete usr.dataValues.password;
     return usr.dataValues;
   }
 
   async findUid(uid) {
     const userid = await models.User.findByPk(uid);
     if (!userid) {
-      throw boom.notFound('Usuario no encontrado');
+      throw boom.unauthorized();
     }
     return userid;
+  }
+
+  async findByEmail(email) {
+    const user = await models.User.findOne({where: { email: email }});
+    if (!user) {
+      throw boom.unauthorized(); // no es buena practica informar que no se encontro el mail
+    }
+    return user;
   }
 
   async update(uid, data) {

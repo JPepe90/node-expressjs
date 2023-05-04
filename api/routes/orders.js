@@ -1,8 +1,10 @@
 const express = require('express');
+const passport = require('passport');
 const OrderService = require('../services/orders.service');
 const validatorHandler = require('../middleware/validator.handler');
 const { createOrderSchema, updateOrderSchema, getOrderSchema, addItemSchema } = require('../schemas/orders.schema');
-const { createServer } = require('mysql2');
+// const { createServer } = require('mysql2');
+const { checkRoles } = require('../middleware/auth.handler');
 const router = express.Router();
 const servicioOrders = new OrderService();
 
@@ -40,11 +42,14 @@ router.get('/:id',
 // CREACION --------------------------------------------------
 // Metodo: POST -----
 router.post('/',
-  validatorHandler(createOrderSchema, 'body'),
+  passport.authenticate('jwt', {session: false}),
+  checkRoles('admin','customer','seller'),
   async (req, res, next) => {
-    const data = req.body;
     try {
-      const newOrder = await servicioOrders.create(data);
+      const user = req.user;
+      console.log(user);
+      const userInfo = await servicioOrders.findByUser(user.sub);
+      const newOrder = await servicioOrders.create({ cid: userInfo[0].cid });
       res.status(201).json(newOrder);
     } catch (error) {
       next(error);

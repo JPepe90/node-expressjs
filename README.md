@@ -253,3 +253,105 @@ Ver ejemplo en productos.service.js. En general estos parametros vienen en los q
 Probaremos enviar un precio minimo y maximo y filtrarlo por medio de sequelize y query params. Estos se hacen por medio de la libreria sequelize y los metodos de Op.
 
 Ver ejemplo en el metodo search del archivo productos.service.js.
+
+### Deployment a Heroku con inclusion de bases de datos
+-- Pendiente
+
+-------------------------------------------------------------------------
+###### 01/05/2023
+### Autenticacion vs Autorizacion
+- Autenticacion: Se encarga de verificar quien eres y si puedes ingresar o no de acuerdo a tus credenciales.
+
+En general lo haremos utilizando credenciales de usuario y verificandolas contra la base de datos.
+
+- Autorizacion: Relacionado a la gestion de permisos.
+
+Como protegemos endpoints de acuerdo a roles o permisos.
+
+Agregamos un middleware llamado checkApiKey y lo incluimos para validar el header.
+
+### Hashing de contraseñas
+Usando la libreria bcrypt. Creamos el archivo pass-hash.js como modelo en la raiz del directorio que se encargará de comparar las pw ingresadas con la hasheada.
+
+Luego agregamos el metodo de encriptacion a los servicios de creacion de usuarios en los archivos customer.service.js y usuarios.service.js
+
+### Pasport JS
+Nos permite muchas estrategias de autentificacion (como google, facebook, twitter, etc).
+Instalamos las siguientes dependencias:
+
+- npm i passport passport-local
+
+Agregamos la carpeta utils/auth y ahi agregamos el archivo index donde pondremosl as estrategias de autorizacion y tambien crearemos un directorio llamado strategies/ donde crearemos la logica de cada uno. En local.strategy.js esta la estrategia local.
+
+### JSON Web Tokens (JWT)
+Adema de comprobar, nos va a dar llaves de acceso.
+Son stateless, no lo tienes que guardar en memoria ni en base de datos la informacion de acceso, se trata de un token que viene encriptado y tiene toda la informacion para identificar al usuario y sus permisos lo que permite tener un backend distribuido. Tambien permite el uso fuera de browser, como aplicaciones mobile. 
+
+- Documentacion: https://jwt.io/
+
+El token tiene 3 partes separadas por un punto (.):
+
+- HEADER: algoritmo y tipo
+
+{
+  "alg": "HS256", 
+  "typ": "JWT"
+}
+
+- PAYLOAD: DATA
+
+{
+  "sub": "126378916",
+  "name": "John Doe",
+  "lat": 1234414
+}
+
+- VERIFY SIGNATURE: combinacion encriptada del HEADER y el PAYLOAD mas una palabra clave que yo elijo
+
+{
+  HMACSHA256(
+    base64UrldEncode(header) + '.' +
+    base64UrldEncode(payload) + '.' +
+    clave-secreta
+  )
+}
+
+Instalacion:
+
+- npm i jsonwebtoken
+
+En el archivo jwt.estrategy.js esta la logica para validar con jwt. Luego se incluye el passport al index de la carpeta superior la posibilidad de loggearse con jwt y despues se utiliza como un middleware por cada endpoint que se desea segurizar.
+
+### Control de roles / AUTORIZACIONES
+Dentro del archivo auth.handler.js creamos el middleware checkRoles(...roles) que se encargarà de verificar que el rol de mi usuario està incluido dentro de los roles habilitados para la accion solicitada. Para poder usar este handler, antes es necesario, si o si, autenticarse ya que necesitamos saber de que usuario estamos hablando y sus privilegios.
+
+otro metodo mas avanzado es con la libreria <accesscontrol> de npm.
+
+-------------------------------------------------------------------------
+###### 03/05/2023
+Creamos la seccion profile para ver las ordenes de compra a partir del token gestionado para el usuario.
+
+1. Ruta profile.router.js y generacion del endpoint
+2. Agregamos al listado de rutas del index
+3. Creacion del servicio que gestiona esta busqueda
+
+### Consultas anidadas con JOIN
+Ver ejemplo de busquedas de ordenes de compra por uuserId en el servicio orders.service.js --> findByUser y el endpoint creado en profile.router.js llamado /my-orders.
+
+#### Manejo de autenticacion desde el cliente
+Client Session Browser
+1. Estado de Login
+2. Cookies / LocalStorage de la sesion
+3. Enviar en el header la informacion del token
+4. Refresh token para gestionar la generacion de nuevo token automatico despues de la expiracion
+5. Validacion de permisos (seguridad)
+
+### Envio de mails con NodeJS
+Uutilizaremos la libreria nodemailer
+
+- npm i nodemailer
+
+Se agregaron a la ruta de auth posts para el cambio de contraseña y login. Utilizando el nodemailes se agrego el archivo auth.service.js que incluye servicios para enviar mails, el login y la carga de informacion de entorno del servidor smtp. Las funciones utilizadas estan en dicho archivo.
+
+
+

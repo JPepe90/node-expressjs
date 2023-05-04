@@ -28,6 +28,12 @@ const UserSchema = {
     primaryKey: false,
     type: DataTypes.STRING
   },
+  recoveryToken: {
+    field: 'recovery_token',
+    allowNull: true,
+    primaryKey: false,
+    type: DataTypes.STRING
+  },
   image: {
     allowNull: true,
     autoIncrement: false,

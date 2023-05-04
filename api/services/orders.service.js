@@ -23,7 +23,9 @@ class OrderService {
 
 
   async find() {
-    const result = await models.Order.findAll();
+    const result = await models.Order.findAll({
+      include: ['items']
+    });
     return result;
   }
 
@@ -41,6 +43,28 @@ class OrderService {
       throw boom.notFound('No se ha encontrado la orden de compra');
     }
     return result;
+  }
+
+  async findByUser(uid) {
+    const orders = await models.Order.findAll({
+      where: {
+        '$customer.user.uid$': uid
+      },
+      include: [
+        {
+          association: 'customer',
+          include: ['user']
+        }
+      ]
+    });
+    console.log ({
+      orders: orders,
+      userId: uid
+    })
+    if (!orders) {
+      throw boom.notFound('No se ha encontrado ordenes de compra');
+    }
+    return orders;
   }
 
   async update(id, data) {

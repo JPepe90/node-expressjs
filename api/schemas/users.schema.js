@@ -4,6 +4,7 @@ const uid = joi.number();
 const username = joi.string().min(3).max(15);
 const email = joi.string().email();
 const password = joi.string();
+const recoveryToken = joi.string();
 const image = joi.string().uri();
 const isBlock = joi.boolean();
 const role = joi.string().min(5);
@@ -23,6 +24,7 @@ const updateUserSchema = joi.object({
   username: username,
   email: email,
   password: password,
+  recoveryToken: recoveryToken,
   image: image,
   isBlock: isBlock,
   role: role,
@@ -32,6 +34,7 @@ const updateUserSchema = joi.object({
 const getUserSchema = joi.object({
   uid: uid,
   email: email,
+  password: password
 });
 
 module.exports = { createUserSchema, updateUserSchema, getUserSchema };

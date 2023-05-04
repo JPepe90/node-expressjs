@@ -44,7 +44,7 @@ router.post('/',
       const newCustomer = await servicioCustomers.create(data);
       res.status(201).json({
         message: 'Customer creado',
-        data: data
+        data: newCustomer
       });
     } catch (error) {
       next(error);

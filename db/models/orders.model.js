@@ -43,12 +43,14 @@ const OrderSchema = {
   total: {
     type: DataTypes.VIRTUAL,
     get() {
-      if (this.items.length > 0) {
-        return this.items.reduce((total, item) => {
-          return total + (item.price * item.OrderProduct.amount);
-        }, 0)
+      if (this.items) {
+        if (this.items.length > 0) {
+          return this.items.reduce((total, item) => {
+            return total + (item.price * item.OrderProduct.amount);
+          }, 0)
+        }
+        return 0;
       }
-      return 0;
     }
   }
 };
@@ -57,7 +59,7 @@ class Order extends Model {
   static associate(models) {
     this.belongsTo(models.Customer, {
       as: 'customer',
-      foreignKey: 'id',
+      foreignKey: 'customer_id',
     });
     this.belongsToMany(models.Product, {
       as: 'items',
