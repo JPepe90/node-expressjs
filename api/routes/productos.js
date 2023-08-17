@@ -138,7 +138,7 @@ router.delete('/:id',
   async (req, res, next) => {
   const id = req.params.id;
   try {
-    const respuesta = await servicioProductos.delete(id);
+    await servicioProductos.delete(id);
     res.status(200).json({
       message: 'deleted',
       id
