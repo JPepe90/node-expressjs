@@ -32,7 +32,7 @@ require('../utils/auth'); // passport JS para autenticacion
 
 // -----
 app.get('/api/v1', (req, res) => {
-  res.send('Hola, mi server en Express');
+  res.send('Hola, bienvenido a esta nueva eCommerce');
 });
 
 // -------------------------------------------------------
